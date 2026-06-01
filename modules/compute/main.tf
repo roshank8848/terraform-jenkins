@@ -43,21 +43,13 @@ resource "aws_instance" "jenkins_master" {
   instance_type          = var.instance_type
   subnet_id              = var.public_subnet_id
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  iam_instance_profile = "LabInstanceProfile"
 
   # Automated Installation of Jenkins Master
   user_data = <<-EOF
               #!/bin/bash
               sudo apt-get update -y
               sudo apt-get install openjdk-17-jdk -y
-              sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-                https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-              echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
-                https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-                /etc/apt/sources.list.d/jenkins.list > /dev/null
-              sudo apt-get update -y
-              sudo apt-get install jenkins -y
-              sudo systemctl enable jenkins
-              sudo systemctl start jenkins
               EOF
 
   tags = { Name = "jenkins-master" }
@@ -69,6 +61,7 @@ resource "aws_instance" "jenkins_slave" {
   instance_type          = var.instance_type
   subnet_id              = var.public_subnet_id
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  iam_instance_profile = "LabInstanceProfile"
 
   # Automated Setup of Jenkins Agent (Needs Java and runtime dependencies)
   user_data = <<-EOF
